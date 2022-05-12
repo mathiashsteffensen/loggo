@@ -72,7 +72,7 @@ func newLogger() *Logger {
 	case "test":
 		return &Logger{level: QuietLevel}
 	case "production":
-		return &Logger{level: WarnLevel}
+		return &Logger{level: InfoLevel}
 	default:
 		panic("GO_ENV must be one of [production, development, test]")
 	}
