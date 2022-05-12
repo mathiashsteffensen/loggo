@@ -1,4 +1,4 @@
-module loggo
+module github.com/mathiashsteffensen/loggo
 
 go 1.17
 
