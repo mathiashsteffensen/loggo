@@ -37,8 +37,8 @@ func NewGRPCStream() grpc.StreamServerInterceptor {
 		logger.Infof("%s | STATUS: %s | Completed in %s", info.FullMethod, status, duration)
 	}
 
-	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		duration, err := measureDurationStreamGRPC(handler, srv, ss)
+	return func(server interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		duration, err := measureDurationStreamGRPC(handler, server, ss)
 
 		if err != nil {
 			log(redBg(bold(" ERROR ")), info, duration)
