@@ -19,6 +19,16 @@ func measureDurationGRPC(handler grpc.UnaryHandler, ctx context.Context, req int
 	return diff, resp, err
 }
 
+func measureDurationStreamGRPC(handler grpc.StreamHandler, srv interface{}, stream grpc.ServerStream) (time.Duration, error) {
+	start := time.Now()
+
+	err := handler(srv, stream)
+
+	diff := time.Since(start)
+
+	return diff, err
+}
+
 func measureDurationHTTP(handler http.Handler, w http.ResponseWriter, req *http.Request) time.Duration {
 	start := time.Now()
 

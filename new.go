@@ -30,6 +30,26 @@ func NewGRPC() grpc.UnaryServerInterceptor {
 	}
 }
 
+func NewGRPCStream() grpc.StreamServerInterceptor {
+	logger := NewWithPrefix("gRPC: ")
+
+	log := func(status string, info *grpc.StreamServerInfo, duration time.Duration) {
+		logger.Infof("%s | STATUS: %s | Completed in %s", info.FullMethod, status, duration)
+	}
+
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		duration, err := measureDurationStreamGRPC(handler, srv, ss)
+
+		if err != nil {
+			log(redBg(bold(" ERROR ")), info, duration)
+		}
+
+		log(greenBg(bold(" OK ")), info, duration)
+
+		return err
+	}
+}
+
 type ResponseWriter struct {
 	http.ResponseWriter
 	statusCode int
