@@ -2,25 +2,12 @@ package loggo
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"time"
 )
 
 type (
-	ILogger interface {
-		Debug(...interface{})
-		Debugf(string, ...interface{})
-
-		Info(...interface{})
-		Infof(string, ...interface{})
-
-		Warn(...interface{})
-		Warnf(string, ...interface{})
-
-		Error(...interface{})
-		Errorf(string, ...interface{})
-	}
-
 	Logger struct {
 		l     *log.Logger
 		level LogLevel
@@ -110,4 +97,30 @@ func (logger *Logger) Error(entries ...interface{}) {
 
 func (logger *Logger) Errorf(format string, entries ...interface{}) {
 	logger.Error(fmt.Sprintf(format, entries...))
+}
+
+func (logger *Logger) Level() LogLevel {
+	return logger.level
+}
+
+func (logger *Logger) WithLevel(level LogLevel) *Logger {
+	return &Logger{
+		l:     logger.l,
+		level: level,
+	}
+}
+
+func (logger *Logger) WithPrefix(prefix string) *Logger {
+	return &Logger{
+		l:     log.New(logger.l.Writer(), prefix, logger.l.Flags()),
+		level: 0,
+	}
+}
+
+// WithWriter creates a new Logger instance with the specified io.Writer.
+func (logger *Logger) WithWriter(writer io.Writer) *Logger {
+	return &Logger{
+		l:     log.New(writer, logger.l.Prefix(), logger.l.Flags()),
+		level: logger.level,
+	}
 }

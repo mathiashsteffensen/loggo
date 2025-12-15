@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+var grpcLogger = New().WithPrefix("gRPC: ")
+
 func NewGRPC() grpc.UnaryServerInterceptor {
-	logger := NewWithPrefix("gRPC: ")
+	logger := grpcLogger
 
 	log := func(status string, info *grpc.UnaryServerInfo, duration time.Duration) {
 		logger.Infof("%s | STATUS: %s | Completed in %s", info.FullMethod, status, duration)
@@ -31,7 +33,7 @@ func NewGRPC() grpc.UnaryServerInterceptor {
 }
 
 func NewGRPCStream() grpc.StreamServerInterceptor {
-	logger := NewWithPrefix("gRPC: ")
+	logger := grpcLogger
 
 	log := func(status string, info *grpc.StreamServerInfo, duration time.Duration) {
 		logger.Infof("%s | STATUS: %s | Completed in %s", info.FullMethod, status, duration)
@@ -60,7 +62,7 @@ func (w *ResponseWriter) WriteHeader(code int) {
 	w.ResponseWriter.WriteHeader(code)
 }
 
-func NewHTTP(next http.Handler, logger ILogger) http.Handler {
+func NewHTTP(next http.Handler, logger *Logger) http.Handler {
 	log := func(status, processedIn string, req *http.Request) {
 		logger.Infof("%s %s | %s | %s", req.Method, req.URL.Path, status, processedIn)
 	}
@@ -87,29 +89,17 @@ func NewHTTP(next http.Handler, logger ILogger) http.Handler {
 
 func newLogger() *Logger {
 	switch env("GO_ENV", "development") {
-	case "development":
-		return &Logger{level: DebugLevel}
 	case "test":
 		return &Logger{level: QuietLevel}
 	case "production":
 		return &Logger{level: InfoLevel}
 	default:
-		panic("GO_ENV must be one of [production, development, test]")
+		return &Logger{level: DebugLevel}
 	}
 }
 
-func NewVanilla() ILogger {
+func New() *Logger {
 	l := logpkg.New(os.Stdout, "", 0)
-
-	logger := newLogger()
-
-	logger.l = l
-
-	return logger
-}
-
-func NewWithPrefix(prefix string) ILogger {
-	l := logpkg.New(os.Stdout, prefix, 0)
 
 	logger := newLogger()
 
